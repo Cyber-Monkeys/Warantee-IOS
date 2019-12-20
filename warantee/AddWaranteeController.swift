@@ -53,46 +53,6 @@ class AddWaranteeController: UIViewController,  UIPickerViewDelegate, UIPickerVi
     }
     
     
-    
-    func addTrasnparentView(frames: CGRect){
-        
-        let window = UIApplication.shared.keyWindow
-        transparentView.frame = window?.frame ?? self.view.frame
-        self.view.addSubview(transparentView)
-        
-        tableView.frame = CGRect(x: frames.origin.x, y: frames.origin.y + frames.height, width: frames.width, height: 0)
-        //add table view
-        self.view.addSubview(tableView)
-        tableView.layer.cornerRadius = 5
-        
-        //setting the shade colour of the screen background
-        transparentView.backgroundColor = UIColor.black.withAlphaComponent(0.9)
-        
-        tableView.reloadData()
-        
-        //this is to recognize when you click anywhewre on the screen
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(removeTransparentView))
-        
-        //tab anywhere on the page to close the menu
-        transparentView.addGestureRecognizer(tapGesture)
-        transparentView.alpha = 0
-        
-        //How the category list will be viewed
-        UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 1.0, options: .curveEaseInOut, animations:{ self.transparentView.alpha = 0.5
-            self.tableView.frame = CGRect(x: frames.origin.x, y: frames.origin.y + frames.height + 5, width: frames.width, height: CGFloat(self.dataSource.count * 50) )
-        }, completion: nil)
-    }
-    
-    //Function to remove the animation of the view
-    @objc func removeTransparentView (){
-        let frames  = selectedButton.frame
-        
-        UIView.animate(withDuration: 0.4, delay: 0.0, usingSpringWithDamping: 1.0, initialSpringVelocity: 1.0, options: .curveEaseInOut, animations:{ self.transparentView.alpha = 0
-            self.tableView.frame = CGRect(x: frames.origin.x, y: frames.origin.y + frames.height, width: frames.width, height: 0)
-        }, completion: nil)
-        
-    }
-    
     //Functtion to go to the next page
     // send all form data to next page
     @IBAction func NextPage(_ sender: Any) {
