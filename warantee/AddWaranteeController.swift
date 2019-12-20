@@ -8,12 +8,9 @@
 
 import UIKit
 
-
-class CellClass: UITableViewCell {
-    
-}
+// form page 1
 class AddWaranteeController: UIViewController,  UIPickerViewDelegate, UIPickerViewDataSource{
-
+    // form ui
     @IBOutlet weak var txtAmount: UITextField!
     @IBOutlet weak var txtName: UITextField!
     @IBOutlet weak var txtPhone: UITextField!
@@ -36,10 +33,10 @@ class AddWaranteeController: UIViewController,  UIPickerViewDelegate, UIPickerVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // create custom category picker
        picker.delegate = self
         picker.dataSource = self
-        
+        // create custom date picker
         //this is to pick on the text field and shows the calander
         datePicker = UIDatePicker()
         datePicker?.datePickerMode = .date
@@ -56,15 +53,6 @@ class AddWaranteeController: UIViewController,  UIPickerViewDelegate, UIPickerVi
     }
     
     
-    //Category Button
-    @IBAction func selectCategory(_ sender: Any) {
-        
-        dataSource = ["Food","Grocery","Travel","Electronics","Others"]
-        selectedButton = categorySelect
-        //Function to view the list
-        addTrasnparentView(frames: categorySelect.frame)
-        
-    }
     
     func addTrasnparentView(frames: CGRect){
         
@@ -106,6 +94,7 @@ class AddWaranteeController: UIViewController,  UIPickerViewDelegate, UIPickerVi
     }
     
     //Functtion to go to the next page
+    // send all form data to next page
     @IBAction func NextPage(_ sender: Any) {
         let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let menuVC:Image_VideoController = storyboard.instantiateViewController(withIdentifier: "WaranteeForm2") as! Image_VideoController
@@ -162,22 +151,19 @@ class AddWaranteeController: UIViewController,  UIPickerViewDelegate, UIPickerVi
            myImageView.frame = CGRect(x:0, y:0, width:50, height:50)
           var rowString = String()
           switch row {
-           case 0:
-               rowString = "all"
-               myImageView.image = UIImage(named:"warantee")
-          case 1:
+          case 0:
               rowString = "food"
               myImageView.image = UIImage(named:"food")
-          case 2:
+          case 1:
               rowString = "grocery"
               myImageView.image = UIImage(named:"grocery")
-           case 3:
+           case 2:
                rowString = "travel"
                myImageView.image = UIImage(named:"travel")
-           case 4:
+           case 3:
                rowString = "electronics"
                myImageView.image = UIImage(named:"electronics")
-           case 5:
+           case 4:
                rowString = "others"
                myImageView.image = UIImage(named:"others")
            
@@ -195,29 +181,11 @@ class AddWaranteeController: UIViewController,  UIPickerViewDelegate, UIPickerVi
 
           return myView
        }
+    // select category value when selecting a row
        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
            self.category = row
     }
-           
-
     
 }
 
-extension AddWaranteeController: UITableViewDataSource, UITableViewDelegate{
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSource.count
-    }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel?.text = dataSource[indexPath.row]
-        return cell
-    }
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50
-    }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedButton.setTitle(dataSource[indexPath.row], for: .normal)
-        removeTransparentView()
-    }
-}
 

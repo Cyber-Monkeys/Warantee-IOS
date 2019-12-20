@@ -12,7 +12,7 @@ import Firebase
 import AVKit
 import AVFoundation
 import MapKit
-
+// display waranty information
 class WarantyInfoViewController: UIViewController {
 
     var warantyId = -1
@@ -45,6 +45,7 @@ class WarantyInfoViewController: UIViewController {
     var avPlayer: AVPlayer!
     override func viewDidLoad() {
         super.viewDidLoad()
+        // load data from coredata
         let thisAppDelegate = UIApplication.shared.delegate as! AppDelegate
         let context = thisAppDelegate.persistentContainer.viewContext
         
@@ -75,6 +76,10 @@ class WarantyInfoViewController: UIViewController {
                 categoryLabel.text = "None"
             }
             self.warantyUId = waranty.uid ?? ""
+            
+            // search map for location and display it
+            
+            
             let request = MKLocalSearch.Request()
             request.naturalLanguageQuery = waranty.location
             request.region = mapView.region
@@ -98,7 +103,12 @@ class WarantyInfoViewController: UIViewController {
                 self.mapView.setRegion(region, animated: true)
                 
             }
+            
+            
+            // verify user login and download video on complete
             Auth.auth().currentUser?.getIDToken(completion: warantyVideoRequest)
+            
+            // load image from retrieved url from coredata
             let documentsUrl:URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             let fileURL = documentsUrl.appendingPathComponent(String(waranty.id) + ".jpg")
             do{
@@ -114,6 +124,8 @@ class WarantyInfoViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
+    
+    // load video from server
     func warantyVideoRequest(token:String?, error: Error?) {
         let documentsUrl:URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let destinationFileUrl = documentsUrl.appendingPathComponent(String(self.warantyId) + ".mp4")
@@ -141,7 +153,6 @@ class WarantyInfoViewController: UIViewController {
                                                       self.addChild(avPlayerController)
                                            }
                     
-                    
                   } catch let error {
                      print(error)
                   }
@@ -150,19 +161,10 @@ class WarantyInfoViewController: UIViewController {
         }
     }
     
-   
+   // go back is pressed
     @IBAction func backButtonPressed(_
         sender: Any) {
         dismiss(animated: true, completion: nil)
     }
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

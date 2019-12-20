@@ -21,26 +21,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         FirebaseApp.configure()
         GIDSignIn.sharedInstance()?.clientID = "698790809157-2e11v65vg2tllj0t66vaeb3c3rvn9r9d.apps.googleusercontent.com"
         GIDSignIn.sharedInstance()?.delegate = self
-        
-//        Auth.auth().addStateDidChangeListener
-//        { (auth, user) in
-//
-//            let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-//
-//            if user != nil {
-//                let menuVC:ViewController = storyboard.instantiateViewController(withIdentifier: "MenuVC") as! ViewController
-//
-//                self.window?.rootViewController = menuVC
-//                self.window?.makeKeyAndVisible()
-//            }else{
-//                let loginVC:LoginController = storyboard.instantiateViewController(withIdentifier: "LoginController") as! LoginController
-//                
-//                self.window?.rootViewController = loginVC
-//                self.window?.makeKeyAndVisible()
-//
-//            }
-//
-//        }
         registerForRichNotifications()
         return true
     }
@@ -52,6 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
        func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
            completionHandler([.alert, .badge, .sound])
        }
+    // get permissions for notifications
     func registerForRichNotifications() {
 
        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.badge,.sound]) { (granted:Bool, error:Error?) in
@@ -93,6 +74,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
     
+    // authenticate user
     func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!,
               withError error: Error!) {
       if let error = error {
@@ -106,7 +88,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         
         guard let authentication = user.authentication else {return}
         let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken, accessToken: authentication.accessToken)
-        
+        // authenticate user with firebase
         Auth.auth().signIn(with: credential) { (result, error) in
             if error == nil {
                 print(result?.user.email)

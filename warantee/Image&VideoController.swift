@@ -11,10 +11,10 @@ import AVKit
 import AVFoundation
 import MobileCoreServices
 import Firebase
-
+// form page 2
 class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    
+    // load default data
     var warantyDate:String = "16/12/2019"
     var warantyAmount:Float = 25.5
     var warantyCategory:Int = 2
@@ -47,8 +47,10 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
     @IBOutlet weak var VideoViewer: UIImageView!
     var isMovie = false
  
+    // record video
     @IBAction func recordvideo(_ sender: Any) {
         isMovie = true
+        // load from camera if available
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
                           
                        let imagePicker = UIImagePickerController()
@@ -59,6 +61,7 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
                    
                            imagePicker.allowsEditing = false
                           self.present(imagePicker, animated: true, completion: nil)
+        // go to gallery if camera is not available
         } else if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.photoLibrary) {
                                 
                              let imagePicker = UIImagePickerController()
@@ -77,9 +80,11 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
     
    @IBOutlet weak var myImage: UIImageView!
     
+// function to take photo from camera
    @IBAction func takePhoto(_ sender: Any) {
              // check if the camera is available
             isMovie = false
+            // load photo from camera if available
               if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
                     
                  let imagePicker = UIImagePickerController()
@@ -89,6 +94,7 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
                      imagePicker.allowsEditing = false
                     self.present(imagePicker, animated: true, completion: nil)
             }
+                // load photo from gallery if camera is not available
               else if(UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.photoLibrary)){
                     print("photo library")
                               let imagePicker = UIImagePickerController()
@@ -103,7 +109,7 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
                 print("photo library and camera unavailable")
             }
     }
-    
+    // json parsed warantee
     struct Warantee: Codable {
         let date:String
         let amount:Float
@@ -114,7 +120,7 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
         let sellerEmail:String
         let location:String
     }
-
+    // json decodable waranty
    struct Waranty: Codable { // or Decodable
        let id: Int
        let uid: String
@@ -129,20 +135,23 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
        let createdAt: String
        let updatedAt: String
    }
-    
+    // post request to server
     func postRequest(token:String?, error: Error?) {
         // ...
-
+        // create waranty codable
         let waranty = Warantee(date: self.warantyDate, amount: self.warantyAmount, category: self.warantyCategory, warantyPeriod: self.warantyPeriod, sellerName: self.warantySellerName, sellerPhone: self.warantySellerPhone, sellerEmail: self.warantySellerEmail, location: self.warantyLocation)
+       //encode codable to json
        guard let uploadData = try? JSONEncoder().encode(waranty) else {
            return
        }
-        
+       //set url
        let url = URL(string: "https://www.vrpacman.com/waranty")!
+        // create request for that url
        var request = URLRequest(url: url)
        request.httpMethod = "POST"
         request.setValue(token, forHTTPHeaderField:"AuthToken")
        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // upload waranty info to server
        let task = URLSession.shared.uploadTask(with: request, from: uploadData) { data, response, error in
            if let error = error {
                print ("error: \(error)")
@@ -171,12 +180,14 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
        task.resume()
 
     }
+    // upload image to server
     func uploadImage(token:String?, warantyId:Int) {
+        // load file from storage
         let documentsUrl:URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileURL = documentsUrl.appendingPathComponent("image.jpg")
         do{
             let imageData = try Data(contentsOf: fileURL)
-
+                    // create multipart request
                    let filename = "image.jpg"
                    let lineEnd = "\r\n"
                    let twoHyphens = "--"
@@ -200,17 +211,18 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
                    urlRequest.setValue(filename, forHTTPHeaderField: "myFile")
                    
                    urlRequest.setValue(String(warantyId), forHTTPHeaderField: "WarantyId")
-
+                    // CREATE DATA TO SET
                    var data = Data()
-
+            
                    // Add the reqtype field and its value to the raw http request data
                    data.append("\r\n--\(boundary)\r\n".data(using: .utf8)!)
                    data.append("Content-Disposition: form-data; name=\"myFile\";filename=\"\(filename)\"\r\n\r\n".data(using: .utf8)!)
+                    // add image data to the request
                    data.append(imageData)
 
                     data.append("\r\n".data(using: .utf8)!)
                     data.append("--\(boundary)--".data(using: .utf8)!)
-
+            // add content length to request
             urlRequest.setValue(String(data.count), forHTTPHeaderField: "Content-Length")
                    // Send a POST request to the URL, with the data we created earlier
                    session.uploadTask(with: urlRequest, from: data, completionHandler: { responseData, response, error in
@@ -223,6 +235,7 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
                            print("no response data")
                            return
                        }
+                    // start upload video task
                     self.uploadVideo(token: token, warantyId: warantyId)
                        if let responseString = String(data: responseData, encoding: .utf8) {
                            print("uploaded to: \(responseString)")
@@ -234,10 +247,13 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
        
        
     }
+    // start upload video task to server
     func uploadVideo(token:String?, warantyId:Int) {
+        // load video from file manager
           let documentsUrl:URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
           let fileURL = documentsUrl.appendingPathComponent("video.MOV")
           do{
+            // create upload video request to server
               let imageData = try Data(contentsOf: fileURL)
 
                      let filename = "video.MOV"
@@ -285,9 +301,8 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
                              print("no response data")
                              return
                          }
-                         
+                         // go to next page when upload is complete
                          if let responseString = String(data: responseData, encoding: .utf8) {
-                             print("uploaded to: \(responseString)")
                              DispatchQueue.main.async {
                                 let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                                 let menuVC:ViewController = storyboard.instantiateViewController(withIdentifier: "MenuVC") as! ViewController
@@ -325,6 +340,7 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
     
  // function to view the picture in the image view
   func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]){
+    // if the saved image is an image; load it to the imageview
     if !isMovie {
     guard let mediaType = info[UIImagePickerController.InfoKey.mediaURL] as? String,
         mediaType == (kUTTypeMovie as String),
@@ -349,8 +365,9 @@ class Image_VideoController: UIViewController, UIImagePickerControllerDelegate, 
                   picker.dismiss(animated: true, completion: nil)
             return
         }
+        // if saved file is of type movie
+        // show video in video player
     } else {
-    print("here")
         let mediaType = info[UIImagePickerController.InfoKey.mediaURL] as? String
         let url = info[UIImagePickerController.InfoKey.mediaURL] as? URL
         UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(url!.path)
