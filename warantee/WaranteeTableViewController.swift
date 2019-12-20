@@ -9,10 +9,11 @@
 import UIKit
 import Firebase
 import CoreData
-
+// main menu page
 class WaranteeTableViewController: UITableViewController {
+    //list of warantees
     var WaranteeList:[Warantee] = []
-
+    // format of json data loaded
     struct Warantee: Codable { // or Decodable
         let id: Int
         let uid: String
@@ -29,27 +30,30 @@ class WaranteeTableViewController: UITableViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
+        // clear data so that latest data is loaded
         deleteAllData(entity: "Waranty")
+        // verify user then load user data
         Auth.auth().currentUser?.getIDToken(completion: warantyRequest)
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
+    
+    //request warantee information from server
     func warantyRequest(token:String?, error: Error?) {
+        // get coredata
         let thisAppDelegate = UIApplication.shared.delegate as! AppDelegate
         let context = thisAppDelegate.persistentContainer.viewContext
         if let url = URL(string: "https://www.vrpacman.com/waranty") {
             var request = URLRequest(url: url)
             request.setValue(token, forHTTPHeaderField:"AuthToken")
             request.httpMethod = "GET"
+            // start url request
             URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                   do {
                     _ = String(data: data,encoding:String.Encoding.utf8) as String?
+                    // decode json data
                      let res = try JSONDecoder().decode([Warantee].self, from: data)
                     print(res.count)
+                    // add warantees to waranteelist and coredata
                     for i in stride(from: 0, to: res.count, by:1){
                         let w = res[i]
                         let waranty = Waranty(context:context)
@@ -65,10 +69,11 @@ class WaranteeTableViewController: UITableViewController {
                         waranty.location = w.location
                         waranty.createdAt = w.createdAt
                         waranty.updatedAt = w.updatedAt
-                        print(w.sellerEmail)
                         self.WaranteeList.append(Warantee(id: w.id, uid: w.uid, date: w.date, amount: w.amount, category: w.category, warantyPeriod: w.warantyPeriod, sellerName: w.sellerName, sellerPhone: w.sellerPhone, sellerEmail: w.sellerEmail, location: w.location, createdAt: w.createdAt, updatedAt: w.updatedAt))
+                        // load image for each warantee
                         self.warantyImageRequest(token:token, error: error, waranty: w, count: i, totalCount: res.count)
                     }
+                    // save coredata
                     thisAppDelegate.saveContext()
                   } catch let error {
                      print(error)
@@ -77,6 +82,7 @@ class WaranteeTableViewController: UITableViewController {
            }.resume()
         }
     }
+    // load image from server
     func warantyImageRequest(token:String?, error: Error?, waranty:Warantee, count: Int, totalCount: Int) {
         let documentsUrl:URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let destinationFileUrl = documentsUrl.appendingPathComponent(String(waranty.id) + ".jpg")
@@ -87,8 +93,10 @@ class WaranteeTableViewController: UITableViewController {
             URLSession.shared.downloadTask(with: request) { localURL, response, error in
             if let localURL = localURL {
                   do {
+                    // load data
                     try? FileManager.default.removeItem(at: destinationFileUrl)
                     try FileManager.default.moveItem(at: localURL, to: destinationFileUrl)
+                    // refresh table view
                     if(count == totalCount - 1) {
                         DispatchQueue.main.async {
                             self.tableView.reloadData()
@@ -103,27 +111,30 @@ class WaranteeTableViewController: UITableViewController {
     }
 
     // MARK: - Table view data source
-
+    // custom table view
+    // 1 section
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
     }
-
+    // connect waranteelist to table view
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return WaranteeList.count
     }
-
+    
+    // customize each cell and load data from warantee list
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "WaranteeCell", for: indexPath) as? WaranteeCell else {
             fatalError("The dequeued cell is not an instance of WaranteeCell")
         }
+        // load data from warantee list
         let warantee = WaranteeList[indexPath.row]
         cell.sellerNameLabel.text = warantee.sellerName
         cell.amountLabel.text = String(warantee.amount)
         cell.periodLabel.text = String(warantee.warantyPeriod)
+        // sets the category icon based on category value
         switch warantee.category {
-         
         case 0:
             cell.iconLabel.image = UIImage(named:"food")
         case 1:
@@ -137,6 +148,7 @@ class WaranteeTableViewController: UITableViewController {
         default:
             cell.iconLabel.image = UIImage(named:"warantee")
         }
+        // load and set warantee icon from file
         let documentsUrl:URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileURL = documentsUrl.appendingPathComponent(String(warantee.id) + ".jpg")
         do{
@@ -147,17 +159,17 @@ class WaranteeTableViewController: UITableViewController {
         }
         return cell
     }
-
+    // on selecting a table view cell load info scene and pass waranty id
     override func tableView(_ tableView:UITableView, didSelectRowAt indexPath: IndexPath) {
         print("cell selected")
         let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let warantyInfoVC:WarantyInfoViewController = storyboard.instantiateViewController(withIdentifier: "WarantyInfo") as! WarantyInfoViewController
         warantyInfoVC.warantyId = self.WaranteeList[indexPath.row].id
-        
         //go to new screen in fullscreen
         warantyInfoVC.modalPresentationStyle = .fullScreen
         self.present(warantyInfoVC, animated: true, completion: nil)
     }
+    //clear core data
     func deleteAllData(entity: String)
     {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -174,54 +186,6 @@ class WaranteeTableViewController: UITableViewController {
             print("Detele all data in \(entity) error :", error)
         }
     }
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    
-//    // MARK: - Navigation
-//
-//    // In a storyboard-based application, you will often want to do a little preparation before navigation
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        // Get the new view controller using segue.destination.
-//        // Pass the selected object to the new view controller.
-//        if(segue.identifier == "sendResult") {
-//            var picker:UIPickerView = sender as! UIPickerView
-//            print(picker.selectedRow(inComponent: 0))
-//        }
-//        
-//    }
     
 
 }

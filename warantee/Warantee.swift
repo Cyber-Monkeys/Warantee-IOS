@@ -7,9 +7,9 @@
 //
 
 import Foundation
-
+// warantee class
 class Warantee {
-    
+    // private variables
     private var _id:Int
     private var _uid: String
     private var _date: String
@@ -23,6 +23,7 @@ class Warantee {
     private var _createdAt: String
     private var _updatedAt: String
     
+    //getters and setters
     var id: Int{
         set(id){_id = id}
         get{return _id}
@@ -72,6 +73,7 @@ class Warantee {
         get{return _updatedAt}
     }
     
+    //constructors
     internal init(id: Int, uid: String, date: String, amount: Float, category: Int, warantyPeriod: Int, sellerName: String, sellerPhone: String, sellerEmail: String, location: String, createdAt: String, updatedAt: String) {
         self._id = id
         self._uid = uid

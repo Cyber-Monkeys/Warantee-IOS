@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 import GoogleSignIn
-
+// login scene
 class LoginController: UIViewController {
 
     //variables
@@ -19,9 +19,7 @@ class LoginController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-     
-        
+     // login to if successful login
       Auth.auth().addStateDidChangeListener
       { (auth, user) in
           
@@ -63,6 +61,7 @@ class LoginController: UIViewController {
         super.viewWillDisappear(animated)
     }
     
+    // got to menu
     func goToMenu(){
         let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let menuVC:ViewController = storyboard.instantiateViewController(withIdentifier: "MenuVC") as! ViewController

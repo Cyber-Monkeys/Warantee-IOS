@@ -8,7 +8,7 @@
 
 import UIKit
 import Firebase
-
+// sign up page
 class SignupController: UIViewController {
 
     @IBOutlet weak var txtEmail: UITextField!
@@ -18,11 +18,11 @@ class SignupController: UIViewController {
         super.viewDidLoad()
         
     }
-    
+    // lsign up user
     @IBAction func signin(_ sender: Any) {
         let email = txtEmail.text!
         let password = txtPassword.text!
-        
+        // create a user with firebase
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
           
             if let firebaseError = error {

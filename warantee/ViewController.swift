@@ -80,10 +80,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
 
         // set UNUserNotificationCenter delegate to self
         UNUserNotificationCenter.current().delegate = self
-        x()
+        setNotification()
         
     }
-    func x() {
+    // sets notification for 10:00 am everyday
+    func setNotification() {
         let notificationOptions: UNAuthorizationOptions = [.alert, .sound];
         UNUserNotificationCenter.current().requestAuthorization(options: notificationOptions) { (granted, error) in
             if !granted {
@@ -93,7 +94,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
                 content.body = "pls work"
                 content.sound = UNNotificationSound.default
 
-                let date = DateComponents(hour: 14, minute: 32)
+                let date = DateComponents(hour: 10, minute: 00)
                 let trigger = UNCalendarNotificationTrigger(dateMatching: date, repeats: false)
 
                 let request = UNNotificationRequest(identifier: "Daily String", content: content, trigger: trigger)
@@ -127,6 +128,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         }
         completionHandler()
     }
+    // redirects user to login screen
     func goToLogin(){
         let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let loginVC:LoginController = storyboard.instantiateViewController(withIdentifier: "LoginController") as! LoginController
@@ -136,24 +138,27 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         self.present(loginVC, animated: true, completion: nil)
     }
     // UIPickerViewDatasource
-    
+    // how many pickers do you have
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
+    // number of options in picker
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return 6
     }
+    // height of each picker
     func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
         return 60
     }
     // UIPickerViewDelegate
-    
+    // set attributes of each picker cell
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
         let myView = UIView()
         myView.frame = CGRect(x:0, y:0, width:pickerView.bounds.width - 30, height:60)
         let myImageView = UIImageView()
         myImageView.frame = CGRect(x:0, y:0, width:50, height:50)
        var rowString = String()
+       // set image based on row selected
        switch row {
         case 0:
             rowString = "all"
@@ -188,20 +193,22 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
 
        return myView
     }
+    // Query coredata on cell selected
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        //self.category = row
-        var tv = self.children[0] as! WaranteeTableViewController
+        let tv = self.children[0] as! WaranteeTableViewController
         tv.WaranteeList.removeAll()
         tv.tableView.reloadData()
         print(tv.WaranteeList.isEmpty)
         let thisAppDelegate = UIApplication.shared.delegate as! AppDelegate
         let context = thisAppDelegate.persistentContainer.viewContext
-        
+        //load core data
         let req:NSFetchRequest<Waranty> = Waranty.fetchRequest()
         if(row != 0) {
+            //query category
             req.predicate = NSPredicate(format: "category = %@", NSNumber(integerLiteral:row - 1))
         }
         do{
+            // set warantee list after retrieving data
             let warantees = try context.fetch(req)
             print(warantees.count)
             for w in warantees {
@@ -213,21 +220,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
            print(error)
         }
         
-        
-      //self.performSegue(withIdentifier: "sendResult", sender: row)
-//        if(row == 5) {
-//            self.performSegue(withIdentifier: "sendResult", sender: self)
-//        } else {
-//
-//        }
     }
-  
+// switch scenes when add button is pressed
     @IBAction func addButtonPressed(_ sender: Any) {
-        
         let storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let form1:AddWaranteeController = storyboard.instantiateViewController(withIdentifier: "WaranteeForm1") as! AddWaranteeController
-//        form1.x = 5
-        
         //go to new screen in fullscreen
         form1.modalPresentationStyle = .fullScreen
         self.present(form1, animated: true, completion: nil)

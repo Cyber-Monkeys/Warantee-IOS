@@ -7,9 +7,11 @@
 //
 
 import UIKit
-
+// custom table view cell
 class WaranteeCell: UITableViewCell {
 
+    // has some ui elements that are set from table view controller
+    
     @IBOutlet weak var amountLabel: UILabel!
     
     @IBOutlet weak var sellerNameLabel: UILabel!
